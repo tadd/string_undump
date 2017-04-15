@@ -1,5 +1,4 @@
 class String
-  # todo: eval in '\#{some_code}' or '\#@var' or '\#$var' ???
   def undump_badly
     hex = /[0-9a-fA-F]/
     esctable = {
