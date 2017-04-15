@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["tad.a.digger@gmail.com"]
 
   spec.summary       = 'String#undump'
-  spec.description   = 'Does inverse of String#dump'
+  spec.description   = 'Unofficial implementation of String#undump, does inverse of String#dump'
   spec.homepage      = 'https://github.com/tadd/string-undump'
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|

@@ -1,6 +1,7 @@
 # String#undump
 
-Does inverse of String#dump.  See [#12275](https://bugs.ruby-lang.org/issues/12275) for details.
+Unofficial implementation of String#undump, does inverse of String#dump.
+See [Feature #12275](https://bugs.ruby-lang.org/issues/12275) for details.
 
 ## Usage
 
