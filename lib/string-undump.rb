@@ -17,6 +17,9 @@ class String
       else
         self.dup
       end
+    s.gsub!(/\\\#\$/, '#$')
+    s.gsub!(/\\\#@/, '#@')
+    s.gsub!(/\\\#{/, '#{')
     s.gsub!(/\\"/, '"')
     s.gsub!(/\\\\/, '\\')
     s.gsub!(/\\[nrtfvbae]/) {|m| esctable[m]}
