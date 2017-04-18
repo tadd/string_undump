@@ -34,3 +34,7 @@ Or install it yourself as:
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/tadd/string-undump.
+
+## License
+
+Ruby's.  See [COPYING](COPYING).
