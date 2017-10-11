@@ -31,6 +31,10 @@ Or install it yourself as:
 
     $ gem install string-undump
 
+## Supported Ruby versions
+
+2.0.0 or later.
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/tadd/string-undump.
