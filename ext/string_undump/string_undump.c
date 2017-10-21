@@ -52,6 +52,9 @@ str_undump_roughly(VALUE str)
 
 	    switch (c)
 	    {
+	      case '\\':
+	      case '"':
+		break; /* don't add backslash */
 	      case '#':
 		n2 = rb_enc_mbclen(s+1, s_end, enc);
 		if (n2 == 1 && IS_EVSTR(s+1, s_end))
@@ -59,9 +62,6 @@ str_undump_roughly(VALUE str)
 		    break;
 		}
 		/* fall through */
-	      case '\\':
-	      case '"':
-		break; /* don't add backslash */
 	      default:
 		rb_str_cat(undumped, "\\", 1L); /* keep backslash */
 	    }
