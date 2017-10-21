@@ -8,6 +8,7 @@ class TestUndump < Test::Unit::TestCase
     assert_equal('foo#$bar#@baz#{quxx}', 'foo\#$bar\#@baz\#{quxx}'.undump_badly)
     assert_equal('\\', '\\\\'.undump_badly)
     assert_equal(%(\\"), '\\\\"'.undump_badly)
+    assert_equal("\n", '\n'.undump_badly)
     assert_equal(%(\\"\n), '\\\\\\"\n'.undump_badly)
     assert_equal('すごーい', '\u3059\u3054\u30FC\u3044'.undump_badly)
     assert_equal('たのしー', '\xE3\x81\x9F\xE3\x81\xAE\xE3\x81\x97\xE3\x83\xBC'.undump_badly)
@@ -22,6 +23,8 @@ class TestUndump < Test::Unit::TestCase
     assert_equal('foo#$bar#@baz#{quxx}', 'foo\#$bar\#@baz\#{quxx}'.undump_roughly)
     assert_equal('\\', '\\\\'.undump_roughly)
     assert_equal(%(\\"), '\\\\"'.undump_roughly)
+    assert_equal("\n", '\n'.undump_roughly)
+    assert_equal(%(\\"\n), '\\\\\\"\n'.undump_roughly)
   end
 
   def test_undump
