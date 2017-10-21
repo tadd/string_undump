@@ -1,3 +1,5 @@
+require_relative 'string-undump/string-undump.so'
+
 class String
   def undump_badly
     hex = /[0-9a-fA-F]/
