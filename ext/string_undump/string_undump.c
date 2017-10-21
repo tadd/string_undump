@@ -41,7 +41,7 @@ str_undump_roughly(VALUE str)
 
     for (; s < s_end; s += n) {
 	c = rb_enc_codepoint_len(s, s_end, &n, enc);
-	if (c == '\\')
+	if (c == '\\' && !got_backslash)
 	{
 	    got_backslash = TRUE;
 	    continue;
@@ -60,13 +60,15 @@ str_undump_roughly(VALUE str)
 		    break;
 		}
 		/* fall through */
+	      case '\\':
+		break; /* don't double backslashes */
 	      default:
 		rb_str_cat(undumped, "\\", 1L); /* keep backslash */
 	    }
+	    got_backslash = FALSE;
 	}
 
 	rb_str_cat(undumped, s, n);
-	got_backslash = FALSE;
     }
 
     return undumped;
