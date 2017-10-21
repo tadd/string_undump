@@ -13,6 +13,7 @@ Gem::Specification.new do |spec|
   spec.files         = files.reject {|f| f.match(%r{^(test|spec|features)/})}
   spec.test_files    = files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
+  spec.extensions    = ["ext/string-undump/extconf.rb"]
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
