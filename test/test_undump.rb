@@ -17,6 +17,7 @@ class TestUndump < Test::Unit::TestCase
 
   def test_undump_roughly
     assert_equal('foo', '"foo"'.undump_roughly)
+    assert_equal('foo#$bar#@baz#{quxx}', 'foo\#$bar\#@baz\#{quxx}'.undump_roughly)
   end
 
   def test_undump

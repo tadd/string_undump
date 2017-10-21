@@ -17,6 +17,9 @@ is_wrapped(const char *s, const char *s_end, rb_encoding *enc)
     return cend == '"';
 }
 
+/* definition copied from ruby/string.c */
+#define IS_EVSTR(p,e) ((p) < (e) && (*(p) == '$' || *(p) == '@' || *(p) == '{'))
+
 static VALUE
 str_undump_roughly(VALUE str)
 {
@@ -27,6 +30,7 @@ str_undump_roughly(VALUE str)
     int n;
     unsigned int c;
     VALUE undumped = rb_enc_str_new(s, 0L, enc);
+    int got_backslash = FALSE;
 
     if (is_wrapped(s, s_end, enc)) {
 	/* strip '"' at the begin and the end */
@@ -35,11 +39,32 @@ str_undump_roughly(VALUE str)
 	len -= 2;
     }
 
-    while (s < s_end) {
+    for (; s < s_end; s += n) {
 	c = rb_enc_codepoint_len(s, s_end, &n, enc);
-	(void) c;
+	if (c == '\\')
+	{
+	    got_backslash = TRUE;
+	    continue;
+	}
+	if (got_backslash)
+	{
+	    unsigned int c2;
+	    int n2;
+
+	    switch (c)
+	    {
+	      case '#':
+		n2 = rb_enc_mbclen(s+1, s_end, enc);
+		if (n2 != 1 || !IS_EVSTR(s+1, s_end))
+		{
+		    rb_str_cat(undumped, "\\", 1L); /* don't remove backslash */
+		}
+		/* else remove it */
+	    }
+	}
+
 	rb_str_cat(undumped, s, n);
-	s += n;
+	got_backslash = FALSE;
     }
 
     return undumped;
