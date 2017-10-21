@@ -1,4 +1,4 @@
-#include "string-undump.h"
+#include "string_undump.h"
 
 static VALUE
 str_undump_roughly(VALUE str)

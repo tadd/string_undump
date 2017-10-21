@@ -1,7 +1,7 @@
 # encoding: euc-jp
 require 'test-unit'
 
-require_relative '../lib/string-undump'
+require_relative '../lib/string_undump'
 
 class TestUndumpEucJp < Test::Unit::TestCase
   def test_undump_badly
