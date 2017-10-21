@@ -17,6 +17,32 @@ is_wrapped(const char *s, const char *s_end, rb_encoding *enc)
     return cend == '"';
 }
 
+static inline const char *
+unescape_ascii(unsigned int c)
+{
+    switch (c)
+    {
+      case 'n':
+	return "\n";
+      case 'r':
+	return "\r";
+      case 't':
+	return "\t";
+      case 'f':
+	return "\f";
+      case 'v':
+	return "\v";
+      case 'b':
+	return "\b";
+      case 'a':
+	return "\a";
+      case 'e':
+	return "\e";
+      default:
+	UNREACHABLE;
+    }
+}
+
 /* definition copied from ruby/string.c */
 #define IS_EVSTR(p,e) ((p) < (e) && (*(p) == '$' || *(p) == '@' || *(p) == '{'))
 
@@ -56,28 +82,14 @@ str_undump_roughly(VALUE str)
 	      case '"':
 		break; /* don't add backslash */
 	      case 'n':
-		rb_str_cat(undumped, "\n", 1L);
-		continue;
 	      case 'r':
-		rb_str_cat(undumped, "\r", 1L);
-		continue;
 	      case 't':
-		rb_str_cat(undumped, "\t", 1L);
-		continue;
 	      case 'f':
-		rb_str_cat(undumped, "\f", 1L);
-		continue;
 	      case 'v':
-		rb_str_cat(undumped, "\v", 1L);
-		continue;
 	      case 'b':
-		rb_str_cat(undumped, "\b", 1L);
-		continue;
 	      case 'a':
-		rb_str_cat(undumped, "\a", 1L);
-		continue;
 	      case 'e':
-		rb_str_cat(undumped, "\e", 1L);
+		rb_str_cat(undumped, unescape_ascii(c), 1L);
 		continue;
 	      case '#':
 		n2 = rb_enc_mbclen(s+1, s_end, enc);
