@@ -48,7 +48,6 @@ str_undump_roughly(VALUE str)
 	}
 	if (got_backslash)
 	{
-	    unsigned int c2;
 	    int n2;
 
 	    switch (c)
