@@ -24,11 +24,9 @@ str_undump_roughly(VALUE str)
     const char *s_end = RSTRING_END(str);
     long len = RSTRING_LEN(str);
     rb_encoding *enc = rb_enc_get(str);
-#if 0
     int n;
     unsigned int c;
     VALUE undumped = rb_enc_str_new(s, 0L, enc);
-#endif
 
     if (is_wrapped(s, s_end, enc)) {
 	/* strip '"' at the begin and the end */
@@ -37,14 +35,14 @@ str_undump_roughly(VALUE str)
 	len -= 2;
     }
 
-#if 0
     while (s < s_end) {
 	c = rb_enc_codepoint_len(s, s_end, &n, enc);
+	(void) c;
+	rb_str_cat(undumped, s, n);
 	s += n;
     }
-#endif
 
-    return rb_enc_str_new(s, len, enc);
+    return undumped;
 }
 
 void
