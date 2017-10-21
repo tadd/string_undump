@@ -61,7 +61,8 @@ str_undump_roughly(VALUE str)
 		}
 		/* fall through */
 	      case '\\':
-		break; /* don't double backslashes */
+	      case '"':
+		break; /* don't add backslash */
 	      default:
 		rb_str_cat(undumped, "\\", 1L); /* keep backslash */
 	    }
