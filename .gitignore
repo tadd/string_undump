@@ -1,3 +1,9 @@
 /pkg/
 /.bundle/
 /Gemfile.lock
+/tmp/
+*.bundle
+*.so
+*.o
+*.a
+mkmf.log
