@@ -13,7 +13,7 @@ environment:
 install:
   - set PATH=C:\Ruby%RUBY_VERSION%\bin;C:\Ruby%RUBY_VERSION%\DevKit\bin;%PATH%
   - bundle install
-  - rake install
+  - rake -rdevkit install
 build: off
 before_test:
   - ruby -v
