@@ -19,7 +19,7 @@ matrix:
     - rvm: ruby-head
       os: osx
 before_install:
-  - gem install test-unit
+  - bundle install
 install:
   - rake install
 script:
