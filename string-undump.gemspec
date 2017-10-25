@@ -1,11 +1,11 @@
 Gem::Specification.new do |spec|
   spec.name          = "string-undump"
-  spec.version       = '0.0.2'
+  spec.version       = '0.0.2.1'
   spec.authors       = ["Tadashi Saito"]
   spec.email         = ["tad.a.digger@gmail.com"]
 
   spec.summary       = 'String#undump'
-  spec.description   = 'Unofficial implementation of String#undump, does inverse of String#dump'
+  spec.description   = 'WARNING: this gem has been deprecated and has been replaced by "string_undump"!'
   spec.homepage      = 'https://github.com/tadd/string-undump'
   spec.license       = "Ruby's"
 
