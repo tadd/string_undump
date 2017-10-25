@@ -58,6 +58,8 @@ str_undump_roughly(VALUE str)
     VALUE undumped = rb_enc_str_new(s, 0L, enc);
     int got_backslash = FALSE;
 
+    rb_must_asciicompat(str);
+
     if (is_wrapped(s, s_end, enc)) {
 	/* strip '"' at the begin and the end */
 	s++;
