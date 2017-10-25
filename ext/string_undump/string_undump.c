@@ -8,9 +8,7 @@ is_wrapped(const char *s, const char *s_end, rb_encoding *enc)
     const char *prev;
 
     cbeg = rb_enc_mbc_to_codepoint(s, s_end, enc);
-    if (cbeg != '"'){
-	return FALSE;
-    }
+    if (cbeg != '"') return FALSE;
 
     prev = rb_enc_prev_char(s, s_end, s_end, enc);
     cend = rb_enc_mbc_to_codepoint(prev, s_end, enc);
@@ -20,8 +18,7 @@ is_wrapped(const char *s, const char *s_end, rb_encoding *enc)
 static inline const char *
 unescape_ascii(unsigned int c)
 {
-    switch (c)
-    {
+    switch (c) {
       case 'n':
 	return "\n";
       case 'r':
@@ -69,17 +66,14 @@ str_undump_roughly(VALUE str)
 
     for (; s < s_end; s += n) {
 	c = rb_enc_codepoint_len(s, s_end, &n, enc);
-	if (c == '\\' && !got_backslash)
-	{
+	if (c == '\\' && !got_backslash) {
 	    got_backslash = TRUE;
 	    continue;
 	}
-	if (got_backslash)
-	{
+	if (got_backslash) {
 	    int n2;
 
-	    switch (c)
-	    {
+	    switch (c) {
 	      case '\\':
 	      case '"':
 		break; /* don't add backslash */
