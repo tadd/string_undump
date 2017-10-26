@@ -25,6 +25,7 @@ class TestUndump < Test::Unit::TestCase
     assert_equal(%(\\"), '\\\\"'.undump_roughly)
     assert_equal("\n", '\n'.undump_roughly)
     assert_equal(%(\\"\n), '\\\\\\"\n'.undump_roughly)
+    assert_equal('すごーい', '\u3059\u3054\u30FC\u3044'.undump_roughly)
   end
 
   def test_undump

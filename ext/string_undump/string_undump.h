@@ -3,6 +3,7 @@
 
 #include <ruby.h>
 #include <ruby/encoding.h>
+#include <ruby/util.h>
 
 #ifndef FALSE
 # define FALSE 0
