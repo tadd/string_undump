@@ -26,7 +26,7 @@ class String
     s.gsub!(/\\\\/, '\\')
     s.gsub!(/\\[nrtfvbae]/) {|m| esctable[m]}
     s.gsub!(/\\u#{hex}{4}/) {|m| m[2..-1].hex.chr(e)}
-    s.gsub!(/\\[ux]{#{hex}+}/) {|m| m[3..-1].hex.chr(e)}
+    s.gsub!(/\\u{#{hex}+}/) {|m| m[3..-1].hex.chr(e)}
     s.gsub!(/(?:\\x#{hex}{2})+/) {|m|
       m.gsub(/\\x/, '').scan(/../).map(&:hex).pack("C*").force_encoding(e)
     }
