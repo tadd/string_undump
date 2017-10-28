@@ -103,10 +103,7 @@ str_undump_roughly(VALUE str)
 		continue;
 	      case '#':
 		n2 = rb_enc_mbclen(s+1, s_end, enc);
-		if (n2 == 1 && IS_EVSTR(s+1, s_end))
-		{
-		    break;
-		}
+		if (n2 == 1 && IS_EVSTR(s+1, s_end)) break;
 		/* fall through */
 	      default:
 		rb_str_cat(undumped, "\\", 1L); /* keep backslash */
