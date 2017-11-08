@@ -89,7 +89,8 @@ str_undump_roughly(VALUE str)
 	      case 'a':
 	      case 'e':
 		rb_str_cat(undumped, unescape_ascii(c), 1L);
-		s++;
+		n = 1;
+		got_backslash = FALSE;
 		continue;
 	      case 'u':
 		c2 = ruby_scan_hex(s+1, 4, &ulen);
@@ -99,7 +100,8 @@ str_undump_roughly(VALUE str)
 		codelen = rb_enc_codelen(c2, enc);
 		rb_enc_mbcput(c2, buf, enc);
 		rb_str_cat(undumped, buf, codelen);
-		s += 5; /* strlen("uXXXX") */
+		n = 5; /* strlen("uXXXX") */
+		got_backslash = FALSE;
 		continue;
 	      case '#':
 		n2 = rb_enc_mbclen(s+1, s_end, enc);
