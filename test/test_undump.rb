@@ -29,6 +29,7 @@ class TestUndump < Test::Unit::TestCase
     assert_equal('\\a\\', '\\\\a\\\\'.undump_roughly)
     assert_equal("\nn", '\nn'.undump_roughly)
     assert_equal("\u30593059", '\u30593059'.undump_roughly)
+    assert_equal('たのしー', '\xE3\x81\x9F\xE3\x81\xAE\xE3\x81\x97\xE3\x83\xBC'.undump_roughly)
   end
 
   def test_undump

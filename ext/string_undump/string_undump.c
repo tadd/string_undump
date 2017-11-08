@@ -103,6 +103,16 @@ str_undump_roughly(VALUE str)
 		n = 5; /* strlen("uXXXX") */
 		got_backslash = FALSE;
 		continue;
+	      case 'x':
+		c2 = ruby_scan_hex(s+1, 2, &ulen);
+		if (ulen != 2) {
+		    rb_raise(rb_eArgError, "invalid hex escape");
+		}
+		*buf = (char)c2;
+		rb_str_cat(undumped, buf, 1);
+		n = 3; /* strlen("xXX") */
+		got_backslash = FALSE;
+		continue;
 	      case '#':
 		n2 = rb_enc_mbclen(s+1, s_end, enc);
 		if (n2 == 1 && IS_EVSTR(s+1, s_end)) break;
