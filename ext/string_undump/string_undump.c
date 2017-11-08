@@ -73,7 +73,7 @@ str_undump_roughly(VALUE str)
 	if (got_backslash) {
 	    unsigned int c2;
 	    int n2, codelen;
-	    size_t ulen;
+	    size_t hexlen;
 	    char buf[6];
 
 	    switch (c) {
@@ -93,8 +93,8 @@ str_undump_roughly(VALUE str)
 		got_backslash = FALSE;
 		continue;
 	      case 'u':
-		c2 = ruby_scan_hex(s+1, 4, &ulen);
-		if (ulen != 4) {
+		c2 = ruby_scan_hex(s+1, 4, &hexlen);
+		if (hexlen != 4) {
 		    rb_raise(rb_eArgError, "invalid Unicode escape");
 		}
 		codelen = rb_enc_codelen(c2, enc);
@@ -104,12 +104,12 @@ str_undump_roughly(VALUE str)
 		got_backslash = FALSE;
 		continue;
 	      case 'x':
-		c2 = ruby_scan_hex(s+1, 2, &ulen);
-		if (ulen != 2) {
+		c2 = ruby_scan_hex(s+1, 2, &hexlen);
+		if (hexlen != 2) {
 		    rb_raise(rb_eArgError, "invalid hex escape");
 		}
 		*buf = (char)c2;
-		rb_str_cat(undumped, buf, 1);
+		rb_str_cat(undumped, buf, 1L);
 		n = 3; /* strlen("xXX") */
 		got_backslash = FALSE;
 		continue;
