@@ -79,7 +79,8 @@ str_undump_roughly(VALUE str)
 	    switch (c) {
 	      case '\\':
 	      case '"':
-		break; /* don't add backslash */
+		rb_str_cat(undumped, s, n); // cat itself
+		break;
 	      case 'n':
 	      case 'r':
 	      case 't':
@@ -90,8 +91,7 @@ str_undump_roughly(VALUE str)
 	      case 'e':
 		rb_str_cat(undumped, unescape_ascii(c), 1L);
 		n = 1;
-		got_backslash = FALSE;
-		continue;
+		break;
 	      case 'u':
 		c2 = ruby_scan_hex(s+1, 4, &hexlen);
 		if (hexlen != 4) {
@@ -101,8 +101,7 @@ str_undump_roughly(VALUE str)
 		rb_enc_mbcput(c2, buf, enc);
 		rb_str_cat(undumped, buf, codelen);
 		n = 5; /* strlen("uXXXX") */
-		got_backslash = FALSE;
-		continue;
+		break;
 	      case 'x':
 		c2 = ruby_scan_hex(s+1, 2, &hexlen);
 		if (hexlen != 2) {
@@ -111,19 +110,21 @@ str_undump_roughly(VALUE str)
 		*buf = (char)c2;
 		rb_str_cat(undumped, buf, 1L);
 		n = 3; /* strlen("xXX") */
-		got_backslash = FALSE;
-		continue;
+		break;
 	      case '#':
 		n2 = rb_enc_mbclen(s+1, s_end, enc);
-		if (n2 == 1 && IS_EVSTR(s+1, s_end)) break;
-		/* fall through */
+		if (n2 == 1 && IS_EVSTR(s+1, s_end)) {
+		  rb_str_cat(undumped, s, n);
+		}
+		break;
 	      default:
 		rb_str_cat(undumped, "\\", 1L); /* keep backslash */
 	    }
 	    got_backslash = FALSE;
 	}
-
-	rb_str_cat(undumped, s, n);
+	else {
+	  rb_str_cat(undumped, s, n);
+	}
     }
 
     return undumped;
