@@ -79,7 +79,7 @@ str_undump_roughly(VALUE str)
 	    switch (c) {
 	      case '\\':
 	      case '"':
-		rb_str_cat(undumped, s, n); // cat itself
+		rb_str_cat(undumped, s, n); /* cat itself */
 		break;
 	      case 'n':
 	      case 'r':
