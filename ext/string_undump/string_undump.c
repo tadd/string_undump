@@ -40,6 +40,28 @@ unescape_ascii(unsigned int c)
     }
 }
 
+/* copied from ruby/string.c:rb_strseq_index */
+static inline const char *
+find_close_brace(const char *s, const char *s_end, rb_encoding *enc)
+{
+    const char *search_start;
+    long search_len = s_end - s, pos;
+
+    search_start = s;
+    for (;;) {
+	const char *t;
+	pos = rb_memsearch("}", 1, search_start, search_len, enc);
+	if (pos < 0) return NULL;
+	t = rb_enc_right_char_head(search_start, search_start+pos, s_end, enc);
+	if (t == search_start + pos) break;
+	search_len -= t - search_start;
+	if (search_len <= 0) return NULL;
+	search_start = t;
+    }
+    return s + pos;
+}
+
+
 /* definition copied from ruby/string.c */
 #define IS_EVSTR(p,e) ((p) < (e) && (*(p) == '$' || *(p) == '@' || *(p) == '{'))
 
@@ -93,14 +115,38 @@ str_undump_roughly(VALUE str)
 		n = 1;
 		break;
 	      case 'u':
-		c2 = ruby_scan_hex(s+1, 4, &hexlen);
-		if (hexlen != 4) {
-		    rb_raise(rb_eArgError, "invalid Unicode escape");
+		c2 = rb_enc_codepoint_len(s+1, s_end, NULL, enc);
+		if (c2 == '{') { /* handle \u{...} form */
+		    const char *p = find_close_brace(s+2, s_end, enc);
+		    unsigned int hex;
+		    if (p == NULL) {
+			rb_raise(rb_eArgError, "unterminated Unicode escape");
+		    }
+		    hex = ruby_scan_hex(s+2, p-(s+2)+1, &hexlen);
+		    if (hexlen == 0 || hexlen > 6) {
+			rb_raise(rb_eArgError, "invalid Unicode escape");
+		    }
+		    if (hex > 0x10ffffU) {
+			rb_raise(rb_eArgError, "invalid Unicode escape");
+		    }
+		    if ((hex & 0xfffff800U) == 0xd800U) {
+			rb_raise(rb_eArgError, "invalid Unicode codepoint");
+		    }
+		    codelen = rb_enc_codelen(hex, enc);
+		    rb_enc_mbcput(hex, buf, enc);
+		    rb_str_cat(undumped, buf, codelen);
+		    n = 3 + hexlen;/* strlen("u{...}") */
 		}
-		codelen = rb_enc_codelen(c2, enc);
-		rb_enc_mbcput(c2, buf, enc);
-		rb_str_cat(undumped, buf, codelen);
-		n = 5; /* strlen("uXXXX") */
+		else { /* handle \uXXXX form */
+		    unsigned int hex = ruby_scan_hex(s+1, 4, &hexlen);
+		    if (hexlen != 4) {
+			rb_raise(rb_eArgError, "invalid Unicode escape");
+		    }
+		    codelen = rb_enc_codelen(hex, enc);
+		    rb_enc_mbcput(hex, buf, enc);
+		    rb_str_cat(undumped, buf, codelen);
+		    n = 5; /* strlen("uXXXX") */
+		}
 		break;
 	      case 'x':
 		c2 = ruby_scan_hex(s+1, 2, &hexlen);

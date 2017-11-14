@@ -30,6 +30,10 @@ class TestUndump < Test::Unit::TestCase
     assert_equal("\nn", '\nn'.undump_roughly)
     assert_equal("\u30593059", '\u30593059'.undump_roughly)
     assert_equal('たのしー', '\xE3\x81\x9F\xE3\x81\xAE\xE3\x81\x97\xE3\x83\xBC'.undump_roughly)
+    assert_equal('🐾', '\u{1F43E}'.undump_roughly)
+    assert_equal(%(すごーい\\🐾たのしー\n\#{foo}),
+                 ('"\u3059\u3054\u30FC\u3044\\\\\u{1F43E}' +
+                  '\xE3\x81\x9F\xE3\x81\xAE\xE3\x81\x97\xE3\x83\xBC\\n\#{foo}"').undump_roughly)
   end
 
   def test_undump
