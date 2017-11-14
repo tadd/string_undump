@@ -111,8 +111,7 @@ str_undump_roughly(VALUE str)
 	      case 'b':
 	      case 'a':
 	      case 'e':
-		rb_str_cat(undumped, unescape_ascii(c), 1L);
-		n = 1;
+		rb_str_cat(undumped, unescape_ascii(c), n);
 		break;
 	      case 'u':
 		c2 = rb_enc_codepoint_len(s+1, s_end, NULL, enc);
