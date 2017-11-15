@@ -126,7 +126,7 @@ str_undump_roughly(VALUE str)
 			rb_raise(rb_eArgError, "invalid Unicode escape");
 		    }
 		    if (hex > 0x10ffffU) {
-			rb_raise(rb_eArgError, "invalid Unicode escape");
+			rb_raise(rb_eArgError, "invalid Unicode codepoint (too large)");
 		    }
 		    if ((hex & 0xfffff800U) == 0xd800U) {
 			rb_raise(rb_eArgError, "invalid Unicode codepoint");
