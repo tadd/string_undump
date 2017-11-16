@@ -61,16 +61,94 @@ find_close_brace(const char *s, const char *s_end, rb_encoding *enc)
     return s + pos;
 }
 
-
 /* definition copied from ruby/string.c */
 #define IS_EVSTR(p,e) ((p) < (e) && (*(p) == '$' || *(p) == '@' || *(p) == '{'))
+
+static int
+undump_after_backslash(VALUE undumped, const char *s, const char *s_end, rb_encoding *enc,
+		       unsigned int c, int n)
+{
+    unsigned int c2;
+    int n2, codelen;
+    size_t hexlen;
+    char buf[6];
+
+    switch (c) {
+      case '\\':
+      case '"':
+	rb_str_cat(undumped, s, n); /* cat itself */
+	break;
+      case 'n':
+      case 'r':
+      case 't':
+      case 'f':
+      case 'v':
+      case 'b':
+      case 'a':
+      case 'e':
+	rb_str_cat(undumped, unescape_ascii(c), n);
+	break;
+      case 'u':
+	c2 = rb_enc_codepoint_len(s+1, s_end, NULL, enc);
+	if (c2 == '{') { /* handle \u{...} form */
+	    const char *p = find_close_brace(s+2, s_end, enc);
+	    unsigned int hex;
+	    if (p == NULL) {
+		rb_raise(rb_eArgError, "unterminated Unicode escape");
+	    }
+	    hex = ruby_scan_hex(s+2, p-(s+2)+1, &hexlen);
+	    if (hexlen == 0 || hexlen > 6) {
+		rb_raise(rb_eArgError, "invalid Unicode escape");
+	    }
+	    if (hex > 0x10ffffU) {
+		rb_raise(rb_eArgError, "invalid Unicode codepoint (too large)");
+	    }
+	    if ((hex & 0xfffff800U) == 0xd800U) {
+		rb_raise(rb_eArgError, "invalid Unicode codepoint");
+	    }
+	    codelen = rb_enc_codelen(hex, enc);
+	    rb_enc_mbcput(hex, buf, enc);
+	    rb_str_cat(undumped, buf, codelen);
+	    n = 3 + hexlen;/* strlen("u{...}") */
+	}
+	else { /* handle \uXXXX form */
+	    unsigned int hex = ruby_scan_hex(s+1, 4, &hexlen);
+	    if (hexlen != 4) {
+		rb_raise(rb_eArgError, "invalid Unicode escape");
+	    }
+	    codelen = rb_enc_codelen(hex, enc);
+	    rb_enc_mbcput(hex, buf, enc);
+	    rb_str_cat(undumped, buf, codelen);
+	    n = 5; /* strlen("uXXXX") */
+	}
+	break;
+      case 'x':
+	c2 = ruby_scan_hex(s+1, 2, &hexlen);
+	if (hexlen != 2) {
+	    rb_raise(rb_eArgError, "invalid hex escape");
+	}
+	*buf = (char)c2;
+	rb_str_cat(undumped, buf, 1L);
+	n = 3; /* strlen("xXX") */
+	break;
+      case '#':
+	n2 = rb_enc_mbclen(s+1, s_end, enc);
+	if (n2 == 1 && IS_EVSTR(s+1, s_end)) {
+	    rb_str_cat(undumped, s, n);
+	}
+	break;
+      default:
+	rb_str_cat(undumped, "\\", 1L); /* keep backslash */
+    }
+
+    return n;
+}
 
 static VALUE
 str_undump_roughly(VALUE str)
 {
     const char *s = StringValuePtr(str);
     const char *s_end = RSTRING_END(str);
-    long len = RSTRING_LEN(str);
     rb_encoding *enc = rb_enc_get(str);
     int n;
     unsigned int c;
@@ -83,7 +161,6 @@ str_undump_roughly(VALUE str)
 	/* strip '"' at the begin and the end */
 	s++;
 	s_end--;
-	len -= 2;
     }
 
     for (; s < s_end; s += n) {
@@ -93,78 +170,7 @@ str_undump_roughly(VALUE str)
 	    continue;
 	}
 	if (got_backslash) {
-	    unsigned int c2;
-	    int n2, codelen;
-	    size_t hexlen;
-	    char buf[6];
-
-	    switch (c) {
-	      case '\\':
-	      case '"':
-		rb_str_cat(undumped, s, n); /* cat itself */
-		break;
-	      case 'n':
-	      case 'r':
-	      case 't':
-	      case 'f':
-	      case 'v':
-	      case 'b':
-	      case 'a':
-	      case 'e':
-		rb_str_cat(undumped, unescape_ascii(c), n);
-		break;
-	      case 'u':
-		c2 = rb_enc_codepoint_len(s+1, s_end, NULL, enc);
-		if (c2 == '{') { /* handle \u{...} form */
-		    const char *p = find_close_brace(s+2, s_end, enc);
-		    unsigned int hex;
-		    if (p == NULL) {
-			rb_raise(rb_eArgError, "unterminated Unicode escape");
-		    }
-		    hex = ruby_scan_hex(s+2, p-(s+2)+1, &hexlen);
-		    if (hexlen == 0 || hexlen > 6) {
-			rb_raise(rb_eArgError, "invalid Unicode escape");
-		    }
-		    if (hex > 0x10ffffU) {
-			rb_raise(rb_eArgError, "invalid Unicode codepoint (too large)");
-		    }
-		    if ((hex & 0xfffff800U) == 0xd800U) {
-			rb_raise(rb_eArgError, "invalid Unicode codepoint");
-		    }
-		    codelen = rb_enc_codelen(hex, enc);
-		    rb_enc_mbcput(hex, buf, enc);
-		    rb_str_cat(undumped, buf, codelen);
-		    n = 3 + hexlen;/* strlen("u{...}") */
-		}
-		else { /* handle \uXXXX form */
-		    unsigned int hex = ruby_scan_hex(s+1, 4, &hexlen);
-		    if (hexlen != 4) {
-			rb_raise(rb_eArgError, "invalid Unicode escape");
-		    }
-		    codelen = rb_enc_codelen(hex, enc);
-		    rb_enc_mbcput(hex, buf, enc);
-		    rb_str_cat(undumped, buf, codelen);
-		    n = 5; /* strlen("uXXXX") */
-		}
-		break;
-	      case 'x':
-		c2 = ruby_scan_hex(s+1, 2, &hexlen);
-		if (hexlen != 2) {
-		    rb_raise(rb_eArgError, "invalid hex escape");
-		}
-		*buf = (char)c2;
-		rb_str_cat(undumped, buf, 1L);
-		n = 3; /* strlen("xXX") */
-		break;
-	      case '#':
-		n2 = rb_enc_mbclen(s+1, s_end, enc);
-		if (n2 == 1 && IS_EVSTR(s+1, s_end)) {
-		  rb_str_cat(undumped, s, n);
-		}
-		break;
-	      default:
-		rb_str_cat(undumped, "\\", 1L); /* keep backslash */
-	    }
+	    n = undump_after_backslash(undumped, s, s_end, enc, c, n);
 	    got_backslash = FALSE;
 	}
 	else {
