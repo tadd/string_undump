@@ -150,10 +150,9 @@ str_undump_roughly(VALUE str)
     const char *s = StringValuePtr(str);
     const char *s_end = RSTRING_END(str);
     rb_encoding *enc = rb_enc_get(str);
-    int n;
-    unsigned int c;
+    int n, n2;
+    unsigned int c, c2;
     VALUE undumped = rb_enc_str_new(s, 0L, enc);
-    int got_backslash = FALSE;
 
     rb_must_asciicompat(str);
 
@@ -165,13 +164,10 @@ str_undump_roughly(VALUE str)
 
     for (; s < s_end; s += n) {
 	c = rb_enc_codepoint_len(s, s_end, &n, enc);
-	if (c == '\\' && !got_backslash) {
-	    got_backslash = TRUE;
-	    continue;
-	}
-	if (got_backslash) {
-	    n = undump_after_backslash(undumped, s, s_end, enc, c, n);
-	    got_backslash = FALSE;
+	if (c == '\\' && s+1 < s_end) {
+	    c2 = rb_enc_codepoint_len(s+1, s_end, &n2, enc);
+	    n = undump_after_backslash(undumped, s+1, s_end, enc, c2, n2);
+	    n += n2;
 	}
 	else {
 	  rb_str_cat(undumped, s, n);
