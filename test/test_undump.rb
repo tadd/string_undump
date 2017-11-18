@@ -36,6 +36,15 @@ class TestUndump < Test::Unit::TestCase
                   '\xE3\x81\x9F\xE3\x81\xAE\xE3\x81\x97\xE3\x83\xBC\\n\#{foo}"').undump_roughly)
   end
 
+  def test_undump_roughly_error
+    assert_raise(ArgumentError.new('invalid Unicode escape')) {'\u'.undump_roughly}
+    assert_raise(ArgumentError.new('unterminated Unicode escape')) {'\u{'.undump_roughly}
+    assert_raise(ArgumentError.new('unterminated Unicode escape')) {'\u{3042'.undump_roughly}
+    assert_raise(ArgumentError.new('invalid hex escape')) {'\x'.undump_roughly}
+    assert_equal('#', '\#'.undump_roughly)
+    assert_raise(ArgumentError.new('invalid escape')) {'\\'.undump_roughly}
+  end
+
   def test_undump
     assert_includes(String.instance_methods, :undump)
   end
