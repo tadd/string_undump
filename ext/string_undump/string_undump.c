@@ -170,7 +170,7 @@ str_undump_roughly(VALUE str)
 	    n += n2;
 	}
 	else {
-	  rb_str_cat(undumped, s, n);
+	    rb_str_cat(undumped, s, n);
 	}
     }
 
