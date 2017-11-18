@@ -2,6 +2,7 @@
 /.bundle/
 /Gemfile.lock
 /tmp/
+/vendor/
 *.bundle
 *.so
 *.o
