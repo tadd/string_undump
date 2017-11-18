@@ -111,7 +111,7 @@ undump_after_backslash(VALUE undumped, const char *s, const char *s_end, rb_enco
 	    codelen = rb_enc_codelen(hex, enc);
 	    rb_enc_mbcput(hex, buf, enc);
 	    rb_str_cat(undumped, buf, codelen);
-	    n += 3 + hexlen;/* strlen("u{...}") */
+	    n += rb_strlen_lit("u{}") + hexlen;
 	}
 	else { /* handle \uXXXX form */
 	    unsigned int hex = ruby_scan_hex(s+1, 4, &hexlen);
@@ -121,7 +121,7 @@ undump_after_backslash(VALUE undumped, const char *s, const char *s_end, rb_enco
 	    codelen = rb_enc_codelen(hex, enc);
 	    rb_enc_mbcput(hex, buf, enc);
 	    rb_str_cat(undumped, buf, codelen);
-	    n += 5; /* strlen("uXXXX") */
+	    n += rb_strlen_lit("uXXXX");
 	}
 	break;
       case 'x':
@@ -131,7 +131,7 @@ undump_after_backslash(VALUE undumped, const char *s, const char *s_end, rb_enco
 	}
 	*buf = (char)c2;
 	rb_str_cat(undumped, buf, 1L);
-	n += 3; /* strlen("xXX") */
+	n += rb_strlen_lit("xXX");
 	break;
       case '#':
 	n2 = rb_enc_mbclen(s+1, s_end, enc);
