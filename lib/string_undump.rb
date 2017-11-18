@@ -33,5 +33,5 @@ class String
     s
   end
 
-  alias_method(:undump, :undump_badly) unless self.new.respond_to?(:undump)
+  alias_method(:undump, :undump_roughly) unless self.new.respond_to?(:undump)
 end
