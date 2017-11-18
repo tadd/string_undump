@@ -16,4 +16,8 @@
 # error TRUE must be true
 #endif
 
+#ifndef rb_strlen_lit
+#define rb_strlen_lit(str) (sizeof(str "") - 1)
+#endif
+
 #endif /* EXT_STRING_UNDUMP_H_INCLUDED */
