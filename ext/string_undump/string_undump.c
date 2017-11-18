@@ -65,18 +65,19 @@ find_close_brace(const char *s, const char *s_end, rb_encoding *enc)
 #define IS_EVSTR(p,e) ((p) < (e) && (*(p) == '$' || *(p) == '@' || *(p) == '{'))
 
 static int
-undump_after_backslash(VALUE undumped, const char *s, const char *s_end, rb_encoding *enc,
-		       unsigned int c, int n)
+undump_after_backslash(VALUE undumped, const char *s, const char *s_end, rb_encoding *enc)
 {
-    unsigned int c2;
-    int n2, codelen;
+    unsigned int c, c2;
+    int n, n2, codelen;
     size_t hexlen;
     char buf[6];
 
+    c = rb_enc_codepoint_len(s, s_end, &n, enc);
     switch (c) {
       case '\\':
       case '"':
 	rb_str_cat(undumped, s, n); /* cat itself */
+	n++;
 	break;
       case 'n':
       case 'r':
@@ -87,6 +88,7 @@ undump_after_backslash(VALUE undumped, const char *s, const char *s_end, rb_enco
       case 'a':
       case 'e':
 	rb_str_cat(undumped, unescape_ascii(c), n);
+	n++;
 	break;
       case 'u':
 	c2 = rb_enc_codepoint_len(s+1, s_end, NULL, enc);
@@ -109,7 +111,7 @@ undump_after_backslash(VALUE undumped, const char *s, const char *s_end, rb_enco
 	    codelen = rb_enc_codelen(hex, enc);
 	    rb_enc_mbcput(hex, buf, enc);
 	    rb_str_cat(undumped, buf, codelen);
-	    n = 3 + hexlen;/* strlen("u{...}") */
+	    n += 3 + hexlen;/* strlen("u{...}") */
 	}
 	else { /* handle \uXXXX form */
 	    unsigned int hex = ruby_scan_hex(s+1, 4, &hexlen);
@@ -119,7 +121,7 @@ undump_after_backslash(VALUE undumped, const char *s, const char *s_end, rb_enco
 	    codelen = rb_enc_codelen(hex, enc);
 	    rb_enc_mbcput(hex, buf, enc);
 	    rb_str_cat(undumped, buf, codelen);
-	    n = 5; /* strlen("uXXXX") */
+	    n += 5; /* strlen("uXXXX") */
 	}
 	break;
       case 'x':
@@ -129,12 +131,13 @@ undump_after_backslash(VALUE undumped, const char *s, const char *s_end, rb_enco
 	}
 	*buf = (char)c2;
 	rb_str_cat(undumped, buf, 1L);
-	n = 3; /* strlen("xXX") */
+	n += 3; /* strlen("xXX") */
 	break;
       case '#':
 	n2 = rb_enc_mbclen(s+1, s_end, enc);
 	if (n2 == 1 && IS_EVSTR(s+1, s_end)) {
 	    rb_str_cat(undumped, s, n);
+	    n += n2;
 	}
 	break;
       default:
@@ -150,8 +153,8 @@ str_undump_roughly(VALUE str)
     const char *s = StringValuePtr(str);
     const char *s_end = RSTRING_END(str);
     rb_encoding *enc = rb_enc_get(str);
-    int n, n2;
-    unsigned int c, c2;
+    int n;
+    unsigned int c;
     VALUE undumped = rb_enc_str_new(s, 0L, enc);
 
     rb_must_asciicompat(str);
@@ -165,9 +168,7 @@ str_undump_roughly(VALUE str)
     for (; s < s_end; s += n) {
 	c = rb_enc_codepoint_len(s, s_end, &n, enc);
 	if (c == '\\' && s+1 < s_end) {
-	    c2 = rb_enc_codepoint_len(s+1, s_end, &n2, enc);
-	    n = undump_after_backslash(undumped, s+1, s_end, enc, c2, n2);
-	    n += n2;
+	    n = undump_after_backslash(undumped, s+1, s_end, enc);
 	}
 	else {
 	    rb_str_cat(undumped, s, n);
