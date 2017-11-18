@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "string_undump"
-  spec.version       = '0.0.3dev'
+  spec.version       = '0.1.0'
   spec.authors       = ["Tadashi Saito"]
   spec.email         = ["tad.a.digger@gmail.com"]
 
