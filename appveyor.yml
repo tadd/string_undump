@@ -12,11 +12,12 @@ environment:
     - RUBY_VERSION: 200-x64
 install:
   - set PATH=C:\Ruby%RUBY_VERSION%\bin;C:\Ruby%RUBY_VERSION%\DevKit\bin;%PATH%
-  - gem install test-unit
-  - rake install
+  - bundle install
+  - rake -rdevkit install
 build: off
 before_test:
   - ruby -v
   - gem -v
+  - bundle -v
 test_script:
   - rake test
