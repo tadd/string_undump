@@ -15,7 +15,7 @@ is_wrapped(const char *s, const char *s_end, rb_encoding *enc)
     return cend == '"';
 }
 
-static inline const char *
+static const char *
 unescape_ascii(unsigned int c)
 {
     switch (c) {
@@ -41,7 +41,7 @@ unescape_ascii(unsigned int c)
 }
 
 /* copied from ruby/string.c:rb_strseq_index */
-static inline const char *
+static const char *
 find_close_brace(const char *s, const char *s_end, rb_encoding *enc)
 {
     const char *search_start;
