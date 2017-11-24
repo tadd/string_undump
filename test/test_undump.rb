@@ -45,6 +45,10 @@ class TestUndump < Test::Unit::TestCase
     assert_raise(ArgumentError.new('invalid escape')) {'\\'.undump_roughly}
   end
 
+  def test_undump_taintedness
+    assert_true(''.taint.undump.tainted?)
+  end
+
   def test_undump
     assert_includes(String.instance_methods, :undump)
   end

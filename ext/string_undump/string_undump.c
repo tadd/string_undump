@@ -194,6 +194,7 @@ str_undump_roughly(VALUE str)
 	}
     }
 
+    OBJ_INFECT(undumped, str);
     return undumped;
 }
 
